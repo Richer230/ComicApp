@@ -1,0 +1,13 @@
+<litepal>
+
+    <dbname value="comics" />
+
+    <version value="1" />
+
+    <list>
+        <mapping class="com.richer.cartoonapp.Beans.Comics" />
+        <mapping class="com.richer.cartoonapp.Beans.Chapters" />
+        <mapping class="com.richer.cartoonapp.Beans.Content" />
+    </list>
+
+</litepal>
