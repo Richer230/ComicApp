@@ -65,7 +65,9 @@ public class Utility {
                     chapter.setChapterIndex(chapterObject.getInt("chapterIndex"));
                     chapter.setIndex(chapterObject.getInt("index"));
                     chapter.setType(chapterObject.getInt("type"));
-                    chaptersList.add(chapter);
+                    if(chapter.getType()==0){
+                        chaptersList.add(chapter);
+                    }
                 }
             }catch (JSONException e){
                 e.printStackTrace();

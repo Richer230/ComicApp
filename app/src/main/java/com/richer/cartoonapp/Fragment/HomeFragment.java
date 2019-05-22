@@ -3,6 +3,7 @@ package com.richer.cartoonapp.Fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,8 +11,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.github.jdsjlzx.recyclerview.LRecyclerView;
+import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.richer.cartoonapp.Adapter.ComicAdapter;
 import com.richer.cartoonapp.Beans.Comics;
 import com.richer.cartoonapp.R;
@@ -33,9 +37,12 @@ import static com.richer.cartoonapp.Util.HttpUtil.sendOkHttpRequest;
 
 public class HomeFragment extends Fragment {
 
+    private int page=1;
     private List<Comics> comicsList = new ArrayList<>();
     private ComicAdapter adapter;
     private RecyclerView recyclerView;
+    private Button nextPage;
+    private Button previousPage;
 
     private SwipeRefreshLayout swipeRefresh;
 
@@ -44,6 +51,20 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.home_fragment,container,false);
 
+        previousPage = view.findViewById(R.id.bt_formal);
+        nextPage = view.findViewById(R.id.bt_next);
+        previousPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toPreviousPage();
+            }
+        });
+        nextPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toNextPage();
+            }
+        });
         initComics();
         recyclerView = view.findViewById(R.id.home_recyclerview);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(),3);
@@ -59,6 +80,19 @@ public class HomeFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void toNextPage() {
+        page++;
+        refreshComics();
+    }
+
+    private void toPreviousPage() {
+        if(page==1){
+            Toast.makeText(getContext(),"已经是第一页啦",Toast.LENGTH_SHORT).show();
+        }
+        page--;
+        refreshComics();
     }
 
     private void refreshComics() {
@@ -84,12 +118,12 @@ public class HomeFragment extends Fragment {
 
     private void initComics() {
 
-        String address = "http://app.u17.com/v3/appV3_3/android/phone" +
-                "/list/getRankComicList?come_from=" +
-                "xiaomi&model=" +
-                "MI+6&serialNumber=7de42d2e&android_id=" +
-                "f5c9b6c9284551ad&v=" +
-                "4500102";
+        String address = "http://app.u17.com/v3/appV3_3/android/phone/list/getRankComicList?" +
+                "period=total&type=2&page="+page+"&come_from=xiaomi" +
+                "&serialNumber=7de42d2e" +
+                "&v=450010" +
+                "&model=MI+6" +
+                "&android_id=f5c9b6c9284551ad";
         System.out.println("*********"+address);
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
@@ -116,4 +150,6 @@ public class HomeFragment extends Fragment {
         });
 
     }
+
+
 }

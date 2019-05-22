@@ -16,6 +16,7 @@ import com.richer.cartoonapp.Acitivity.ContentActivity;
 import com.richer.cartoonapp.Beans.Chapters;
 import com.richer.cartoonapp.R;
 
+import java.text.DateFormat;
 import java.util.List;
 import java.util.Locale;
 
