@@ -1,5 +1,6 @@
 package com.richer.cartoonapp.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,14 +9,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
+import com.richer.cartoonapp.Acitivity.SearchActivity;
 import com.richer.cartoonapp.Adapter.ComicAdapter;
 import com.richer.cartoonapp.Beans.Comics;
 import com.richer.cartoonapp.R;
@@ -43,6 +47,8 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private Button nextPage;
     private Button previousPage;
+    private EditText editSearch;
+    private Button buttonSearch;
 
     private SwipeRefreshLayout swipeRefresh;
 
@@ -50,6 +56,19 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.home_fragment,container,false);
+
+        editSearch = view.findViewById(R.id.et_search);
+        buttonSearch = view.findViewById(R.id.bt_search);
+        buttonSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), SearchActivity.class);
+                String searchText = editSearch.getText().toString();
+                intent.putExtra("searchText",searchText);
+                Log.d("tag", "onClick: "+searchText);
+                getActivity().startActivity(intent);
+            }
+        });
 
         previousPage = view.findViewById(R.id.bt_formal);
         nextPage = view.findViewById(R.id.bt_next);

@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.richer.cartoonapp.Adapter.ChapterAdapter;
@@ -27,6 +29,8 @@ public class ContentActivity extends AppCompatActivity {
 
     private List<Content> contentList = new ArrayList<>();
 
+    private boolean orientation = true;
+
     private ContentAdapter adapter;
     private int chapterId;
     private ZoomRecyclerView recyclerView;
@@ -45,9 +49,12 @@ public class ContentActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(ContentActivity.this,1);
         recyclerView.setLayoutManager(layoutManager);
 
+
         recyclerView.setEnableScale(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.VERTICAL);
+        if(orientation){
+            ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.VERTICAL);
+        }
 
     }
 
@@ -76,5 +83,31 @@ public class ContentActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_change:
+                if(orientation){
+                    ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.HORIZONTAL);
+                    orientation = false;
+                }else{
+                    ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.VERTICAL);
+                    orientation = true;
+                }
+                adapter.notifyDataSetChanged();
+                break;
+            default:
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_content_menu, menu);
+        return true;
     }
 }

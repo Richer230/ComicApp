@@ -23,27 +23,51 @@
 
                 <Button
                     android:id="@+id/bt_formal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="50dp"
+                    android:layout_height="30dp"
+                    android:background="#ffffff"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="0dp"
                     android:text="上一页"
+                    android:textSize="10sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/bt_next"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/et_search"
+                    android:layout_width="230dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/bt_search"
+                    app:layout_constraintStart_toEndOf="@+id/bt_formal"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:background="#ffffff"
+                    android:id="@+id/bt_next"
+                    android:layout_width="50dp"
+                    android:layout_height="30dp"
                     android:layout_gravity="end"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:textSize="10sp"
+                    android:layout_marginBottom="0dp"
                     android:text="下一页"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/bt_search"
+                    android:background="@drawable/ic_search_24dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/bt_next"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </android.support.constraint.ConstraintLayout>

@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.richer.cartoonapp.Acitivity.ContentActivity;
 import com.richer.cartoonapp.Beans.Chapters;
 import com.richer.cartoonapp.R;
+import com.richer.cartoonapp.Util.DateUtil;
 
 import java.text.DateFormat;
 import java.util.List;
@@ -41,7 +42,9 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         Chapters chapter = mChapterList.get(i);
         viewHolder.chapterName.setText(chapter.getName());
-        viewHolder.chapterPublishTime.setText(String.valueOf(chapter.getPublishTime()));
+        DateUtil myDate = new DateUtil();
+        long time = chapter.getPublishTime()*1000;
+        viewHolder.chapterPublishTime.setText(myDate.getYear(time)+"-"+myDate.getMonth(time)+"-"+myDate.getDay(time));
         Glide.with(mContext).load(chapter.getSmallPlaceCover()).into(viewHolder.chapterImg);
 
         viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
