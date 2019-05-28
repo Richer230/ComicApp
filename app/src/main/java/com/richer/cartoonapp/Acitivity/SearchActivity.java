@@ -38,6 +38,8 @@ public class SearchActivity extends AppCompatActivity {
         Intent intent = getIntent();
         searchText = intent.getStringExtra("searchText");
 
+        getSupportActionBar().setTitle("搜索结果");
+
         initComics();
         recyclerView = findViewById(R.id.search_recyclerview);
         GridLayoutManager layoutManager = new GridLayoutManager(this,3);

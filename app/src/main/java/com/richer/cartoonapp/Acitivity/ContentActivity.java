@@ -33,6 +33,7 @@ public class ContentActivity extends AppCompatActivity {
 
     private ContentAdapter adapter;
     private int chapterId;
+    private String chapterName;
     private ZoomRecyclerView recyclerView;
 
     @Override
@@ -42,6 +43,7 @@ public class ContentActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         chapterId = intent.getIntExtra("chapter_id",0);
+        chapterName = intent.getStringExtra("chapter_name");
 
         initContent();
 
@@ -56,6 +58,8 @@ public class ContentActivity extends AppCompatActivity {
             ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.VERTICAL);
         }
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(chapterName);
     }
 
     private void initContent() {
@@ -88,6 +92,8 @@ public class ContentActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
             case R.id.action_change:
                 if(orientation){
                     ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -97,6 +103,9 @@ public class ContentActivity extends AppCompatActivity {
                     orientation = true;
                 }
                 adapter.notifyDataSetChanged();
+                break;
+            case R.id.action_download:
+
                 break;
             default:
                 break;

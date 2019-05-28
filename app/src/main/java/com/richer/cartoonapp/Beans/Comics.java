@@ -4,12 +4,22 @@ import org.litepal.crud.LitePalSupport;
 
 public class Comics extends LitePalSupport {
 
+    private long id;
     private String cover;
     private String name;
     private int comicId;
     private String description;
     private String author;
     private String tags;
+    private boolean isSubscribed;
+
+    public boolean isSubscribed() {
+        return isSubscribed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        isSubscribed = subscribed;
+    }
 
     public String getCover() {
         return cover;
@@ -57,5 +67,13 @@ public class Comics extends LitePalSupport {
 
     public void setTags(String tags) {
         this.tags = tags;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

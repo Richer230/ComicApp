@@ -1,6 +1,10 @@
 package com.richer.cartoonapp.Util;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.richer.cartoonapp.Beans.Chapters;
 import com.richer.cartoonapp.Beans.Comics;
@@ -9,13 +13,36 @@ import com.richer.cartoonapp.Beans.Content;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.litepal.LitePal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+
 public class Utility {
 
+    public static long getLastUpdateTime(String response,int comicId){
+        long lastUpdateTime = 0;
+        if(!TextUtils.isEmpty(response)){
+            try{
+                JSONObject messages = new JSONObject(response);
+                JSONObject datas = messages.getJSONObject("data");
+                JSONObject returnData = datas.getJSONObject("returnData");
+                JSONObject comic = returnData.getJSONObject("comic");
+                lastUpdateTime = comic.getLong("last_update_time");
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+        return lastUpdateTime;
+    }
+
     public static List<Comics> handleComicsResponse(String response){
+        String address;
         List<Comics> comicsList = new ArrayList<>();
         if(!TextUtils.isEmpty(response)){
             try{
@@ -37,6 +64,15 @@ public class Utility {
                         tags = tags+"/"+tagArray.get(j).toString();
                         comic.setTags(tags);
                     }
+                    List<Comics> list = LitePal.where("comicId = ?",String.valueOf(comic.getComicId())).find(Comics.class);
+                    if(list.size()!=0){
+                        for(int k=0;k<list.size();k++){
+                            comic.setId(list.get(k).getId());
+                            LitePal.delete(Comics.class,list.get(k).getId());
+                            comic.setSubscribed(list.get(k).isSubscribed());
+                        }
+                    }
+                    comic.save();
                     comicsList.add(comic);
                 }
             }catch (JSONException e){
@@ -66,6 +102,7 @@ public class Utility {
                     chapter.setIndex(chapterObject.getInt("index"));
                     chapter.setType(chapterObject.getInt("type"));
                     if(chapter.getType()==0){
+                        chapter.save();
                         chaptersList.add(chapter);
                     }
                 }
@@ -92,6 +129,7 @@ public class Utility {
                     content.setImg05(contentObject.getString("img05"));
                     content.setImg50(contentObject.getString("img50"));
                     content.setType(contentObject.getInt("type"));
+                    content.save();
                     contentList.add(content);
                 }
             }catch (JSONException e){

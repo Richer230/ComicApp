@@ -1,5 +1,6 @@
 package com.richer.cartoonapp.Fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
+import com.richer.cartoonapp.Acitivity.MainActivity;
 import com.richer.cartoonapp.Acitivity.SearchActivity;
 import com.richer.cartoonapp.Adapter.ComicAdapter;
 import com.richer.cartoonapp.Beans.Comics;
@@ -127,7 +129,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void run() {
                         initComics();
-                        adapter.notifyDataSetChanged();
+                        if(adapter!=null)adapter.notifyDataSetChanged();
                         swipeRefresh.setRefreshing(false);
                     }
                 });
@@ -147,12 +149,7 @@ public class HomeFragment extends Fragment {
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getContext(),"加载失败",Toast.LENGTH_SHORT).show();
-                    }
-                });
+               //  Toast.makeText(,"加载失败",Toast.LENGTH_SHORT).show();
             }
 
             @Override

@@ -52,6 +52,7 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ViewHold
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, ContentActivity.class);
                 intent.putExtra("chapter_id",chapter.getChapterId());
+                intent.putExtra("chapter_name",chapter.getName());
                 mContext.startActivity(intent);
             }
         });

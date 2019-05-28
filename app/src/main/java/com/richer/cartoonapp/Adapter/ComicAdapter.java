@@ -9,6 +9,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +21,14 @@ import com.richer.cartoonapp.Acitivity.ChapterActivity;
 import com.richer.cartoonapp.Beans.Comics;
 import com.richer.cartoonapp.R;
 
+import org.litepal.LitePal;
+
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+
+import static android.support.constraint.Constraints.TAG;
 
 public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ViewHolder> {
 
@@ -56,6 +61,9 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ViewHolder> 
             intent.putExtra("comic_cover",comic.getCover());
             intent.putExtra("comic_id",comic.getComicId());
             intent.putExtra("comic_description",comic.getDescription());
+            Log.d(TAG, "onBindViewHolder: "+comic.getComicId());
+            Comics comics = LitePal.where("comicId = ?",String.valueOf(comic.getComicId())).find(Comics.class).get(0);
+            intent.putExtra("id",comics.getId());
             mContext.startActivity(intent);
         });
         Glide.with(mContext).load(comic.getCover()).into(viewHolder.comicImage);

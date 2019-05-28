@@ -8,4 +8,10 @@
         android:title="转换"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_download"
+        android:title="下载"
+        android:icon="@drawable/ic_file_download_24dp"
+        app:showAsAction="ifRoom" />
+
 </menu>
