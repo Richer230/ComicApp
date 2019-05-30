@@ -13,7 +13,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Acitivity.SubscribeActivity"></activity>
+        <service
+            android:name=".DownloadService"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service
+            android:name=".SubscribeService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name=".Acitivity.SubscribeActivity" />
         <activity
             android:name=".Acitivity.SearchActivity"
             android:parentActivityName=".Acitivity.MainActivity" />
