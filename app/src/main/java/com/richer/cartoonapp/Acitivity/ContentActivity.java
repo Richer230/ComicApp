@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.richer.cartoonapp.Adapter.ChapterAdapter;
 import com.richer.cartoonapp.Adapter.ContentAdapter;
 import com.richer.cartoonapp.Beans.Content;
+import com.richer.cartoonapp.DownloadService;
 import com.richer.cartoonapp.R;
 import com.richer.cartoonapp.Util.HttpUtil;
 import com.richer.cartoonapp.Util.Utility;
@@ -105,7 +106,8 @@ public class ContentActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.action_download:
-
+                Intent intent = new Intent(ContentActivity.this, DownloadService.class);
+                startService(intent);
                 break;
             default:
                 break;
