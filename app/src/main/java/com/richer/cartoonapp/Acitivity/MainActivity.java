@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,7 +27,6 @@ import com.richer.cartoonapp.Fragment.DownloadFragment;
 import com.richer.cartoonapp.Fragment.HomeFragment;
 import com.richer.cartoonapp.Fragment.MeFragment;
 import com.richer.cartoonapp.R;
-import com.richer.cartoonapp.SubscribeService;
 import com.richer.cartoonapp.Util.HttpUtil;
 
 import org.json.JSONArray;
@@ -47,6 +45,12 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
+
+    private List<Comics> subscribeList = new ArrayList<>();
+    private List<Comics> comicsList = new ArrayList<>();
+
+    private boolean runService = false;
+    private static final String CHANNEL_ID = "Subscribe";
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    private boolean init = true;
+    boolean init = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,97 +90,108 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        Intent intent = new Intent(MainActivity.this, SubscribeService.class);
-        startService(intent);
+        comicsList = LitePal.findAll(Comics.class);
+
+        for(int i=0;i<comicsList.size();i++){
+            Comics comic;
+            comic = comicsList.get(i);
+            if(comic.isSubscribed()){
+                subscribeList.add(comic);
+            }
+        }
+
+        createChannel();
+
+        subscribeNotify();
 
     }
 
-//    private void createChannel() {
-//
-//        String name = "通知";
-//        String text = "更新通知";
-//        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,name,importance);
-//            channel.setDescription(text);
-//            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//            notificationManager.createNotificationChannel(channel);
-//        }
-//
-//    }
+    private void createChannel() {
 
-//    private void subscribeNotify() {
-//        runService = true;
-//        new Thread(()->{
-//            while(runService){
-//                String address;
-//                for(int i=0;i<subscribeList.size();i++){
-//                    Comics comic = subscribeList.get(i);
-//                    Log.d("Id", "subscribeNotify: "+ comic.getComicId());
-//                    address = "http://app.u17.com/v3/appV3_3/" +
-//                            "android/phone/comic/detail_static_new?" +
-//                            "come_from=xiaomi&comicid="+comic.getComicId()+"&serialNumber" +
-//                            "=7de42d2e&v=4500102&model=MI+6&android_id" +
-//                            "=f5c9b6c9284551ad";
-//                    HttpUtil.sendOkHttpRequest(address, new Callback() {
-//                        @Override
-//                        public void onFailure(Call call, IOException e) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onResponse(Call call, Response response) throws IOException {
-//
-//                            SharedPreferences spf = getSharedPreferences("update",MODE_PRIVATE);
-//                            long lastUpdateTime1 = spf.getLong(String.valueOf(comic.getComicId()),0);
-//                            long lastUpdateTime2=0;
-//
-//                            String responseText = response.body().string();
-//                            if(!TextUtils.isEmpty(responseText)){
-//                                try{
-//                                    JSONObject messages = new JSONObject(responseText);
-//                                    JSONObject datas = messages.getJSONObject("data");
-//                                    JSONObject returnData = datas.getJSONObject("returnData");
-//                                    JSONObject comic = returnData.getJSONObject("comic");
-//                                    lastUpdateTime2 = comic.getLong("last_update_time");
-//                                }catch (JSONException e){
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                            Log.d("comic", "onResponse: "+ lastUpdateTime1);
-//                            Log.d("tag", "onResponse: "+ lastUpdateTime2);
-//                            if(lastUpdateTime1 != lastUpdateTime2){
-//
-//                                SharedPreferences.Editor editor = getSharedPreferences("update",MODE_PRIVATE).edit();
-//                                editor.remove(String.valueOf(comic.getComicId()));
-//                                editor.putLong(String.valueOf(comic.getComicId()),lastUpdateTime2);
-//
-//                                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//
-//                                Notification notification =
-//                                        new NotificationCompat.Builder(MainActivity.this,CHANNEL_ID)
-//                                                .setSmallIcon(R.drawable.ic_launcher_background)
-//                                                .setContentText("您订阅的漫画更新了！")
-//                                                .setContentTitle(comic.getName())
-//                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-//                                                .build();
-//
-//                                notificationManager.notify(1,notification);
-//
-//                            }
-//
-//                        }
-//                    });
-//                }
-//                try {
-//                    Thread.sleep(600*1000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//        }).start();
-//    }
+        String name = "通知";
+        String text = "更新通知";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,name,importance);
+            channel.setDescription(text);
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+    }
+
+    private void subscribeNotify() {
+        runService = true;
+        new Thread(()->{
+            while(runService){
+                String address;
+                for(int i=0;i<subscribeList.size();i++){
+                    Comics comic = subscribeList.get(i);
+                    Log.d("Id", "subscribeNotify: "+ comic.getComicId());
+                    address = "http://app.u17.com/v3/appV3_3/" +
+                            "android/phone/comic/detail_static_new?" +
+                            "come_from=xiaomi&comicid="+comic.getComicId()+"&serialNumber" +
+                            "=7de42d2e&v=4500102&model=MI+6&android_id" +
+                            "=f5c9b6c9284551ad";
+                    HttpUtil.sendOkHttpRequest(address, new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+
+                            SharedPreferences spf = getSharedPreferences("update",MODE_PRIVATE);
+                            long lastUpdateTime1 = spf.getLong(String.valueOf(comic.getComicId()),0);
+                            long lastUpdateTime2=0;
+
+                            String responseText = response.body().string();
+                            if(!TextUtils.isEmpty(responseText)){
+                                try{
+                                    JSONObject messages = new JSONObject(responseText);
+                                    JSONObject datas = messages.getJSONObject("data");
+                                    JSONObject returnData = datas.getJSONObject("returnData");
+                                    JSONObject comic = returnData.getJSONObject("comic");
+                                    lastUpdateTime2 = comic.getLong("last_update_time");
+                                }catch (JSONException e){
+                                    e.printStackTrace();
+                                }
+                            }
+                            Log.d("comic", "onResponse: "+ lastUpdateTime1);
+                            Log.d("tag", "onResponse: "+ lastUpdateTime2);
+                            if(lastUpdateTime1 != lastUpdateTime2){
+
+                                SharedPreferences.Editor editor = getSharedPreferences("update",MODE_PRIVATE).edit();
+                                editor.remove(String.valueOf(comic.getComicId()));
+                                editor.putLong(String.valueOf(comic.getComicId()),lastUpdateTime2);
+
+                                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                                Notification notification =
+                                        new NotificationCompat.Builder(MainActivity.this,CHANNEL_ID)
+                                                .setSmallIcon(R.drawable.ic_launcher_background)
+                                                .setContentText("您订阅的漫画更新了！")
+                                                .setContentTitle(comic.getName())
+                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                                .build();
+
+                                notificationManager.notify(1,notification);
+
+                            }
+
+                        }
+                    });
+                }
+                try {
+                    Thread.sleep(600*1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }).start();
+    }
 
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();

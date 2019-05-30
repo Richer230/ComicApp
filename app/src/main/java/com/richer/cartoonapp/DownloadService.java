@@ -1,122 +1,126 @@
 package com.richer.cartoonapp;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.Log;
-import android.widget.ThemedSpinnerAdapter;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
-import com.liulishuo.okdownload.DownloadContext;
-import com.liulishuo.okdownload.DownloadListener;
-import com.liulishuo.okdownload.DownloadTask;
-import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo;
-import com.liulishuo.okdownload.core.cause.EndCause;
-import com.liulishuo.okdownload.core.cause.ResumeFailedCause;
+import com.richer.cartoonapp.Acitivity.MainActivity;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-
-
 
 public class DownloadService extends Service {
 
-    private static String TAG = "TAG";
+    private DownloadTask downloadTask;
 
-    private String url = "http://zip6.u17i.com/62/10662_crop.zip?update_time=1515652521";
-
-    private String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
-    private String fileName = "comic";
-    File parentFile = new File(directory);
+    private String downloadUrl;
 
     private DownloadListener listener = new DownloadListener() {
         @Override
-        public void taskStart(@NonNull DownloadTask task) {
-            Log.d(TAG, "taskStart: ");
+        public void onProgress(int progress) {
+            getNotificationManager().notify(1,getNotification("Downloading...",progress));
         }
 
         @Override
-        public void connectTrialStart(@NonNull DownloadTask task, @NonNull Map<String, List<String>> requestHeaderFields) {
-
+        public void onSuccess() {
+            downloadTask = null;
+            stopForeground(true);
+            getNotificationManager().notify(1,getNotification("Download Success",-1));
+            Toast.makeText(DownloadService.this,"Download Success",Toast.LENGTH_SHORT).show();
         }
 
         @Override
-        public void connectTrialEnd(@NonNull DownloadTask task, int responseCode, @NonNull Map<String, List<String>> responseHeaderFields) {
-
+        public void onFailed() {
+            downloadTask = null;
+            stopForeground(true);
+            getNotificationManager().notify(1,getNotification("Download Failed",-1));
+            Toast.makeText(DownloadService.this,"Download Failed",Toast.LENGTH_SHORT).show();
         }
 
         @Override
-        public void downloadFromBeginning(@NonNull DownloadTask task, @NonNull BreakpointInfo info, @NonNull ResumeFailedCause cause) {
-
+        public void onPaused() {
+            downloadTask = null;
+            Toast.makeText(DownloadService.this,"Paused",Toast.LENGTH_SHORT).show();
         }
 
         @Override
-        public void downloadFromBreakpoint(@NonNull DownloadTask task, @NonNull BreakpointInfo info) {
-
-        }
-
-        @Override
-        public void connectStart(@NonNull DownloadTask task, int blockIndex, @NonNull Map<String, List<String>> requestHeaderFields) {
-
-        }
-
-        @Override
-        public void connectEnd(@NonNull DownloadTask task, int blockIndex, int responseCode, @NonNull Map<String, List<String>> responseHeaderFields) {
-
-        }
-
-        @Override
-        public void fetchStart(@NonNull DownloadTask task, int blockIndex, long contentLength) {
-
-        }
-
-        @Override
-        public void fetchProgress(@NonNull DownloadTask task, int blockIndex, long increaseBytes) {
-
-        }
-
-        @Override
-        public void fetchEnd(@NonNull DownloadTask task, int blockIndex, long contentLength) {
-
-        }
-
-        @Override
-        public void taskEnd(@NonNull DownloadTask task, @NonNull EndCause cause, @Nullable Exception realCause) {
-
+        public void onCanceled() {
+            downloadTask = null;
+            stopForeground(true);
+            Toast.makeText(DownloadService.this,"Canceled", Toast.LENGTH_SHORT).show();
         }
     };
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        new Thread(()->{
-            DownloadTask task = new DownloadTask.Builder(url,parentFile)
-                    .setFilename(fileName)
-                    .setMinIntervalMillisCallbackProcess(30)
-                    .setPassIfAlreadyCompleted(false)
-                    .build();
-            task.enqueue(listener);
-            //task.cancel();
-            task.execute(listener);
-        }).start();
+    private DownloadBinder mBinder = new DownloadBinder();
 
+    class DownloadBinder extends Binder{
+        public void startDownload(String url){
+            if(downloadTask == null){
+                downloadUrl = url;
+                downloadTask = new DownloadTask(listener);
+                downloadTask.execute(downloadUrl);
+                startForeground(1,getNotification("Downloading...",0));
+                Toast.makeText(DownloadService.this,"Downloading...",Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        public void pauseDownload(){
+            if(downloadTask != null){
+                downloadTask.pauseDownload();
+            }
+        }
+
+        public void cacelDownload(){
+            if(downloadTask != null){
+                downloadTask.cancelDownload();
+            }else{
+                if(downloadUrl != null){
+                    String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
+                    String directory = Environment.getExternalStoragePublicDirectory
+                            (Environment.DIRECTORY_DOWNLOADS).getPath();
+                    File file = new File(directory + fileName);
+                    if(file.exists()){
+                        file.delete();
+                    }
+                    getNotificationManager().cancel(1);
+                    stopForeground(true);
+                    Toast.makeText(DownloadService.this,"Canceled",Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    private NotificationManager getNotificationManager() {
+        return (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+    }
+
+    private Notification getNotification(String title,int progress){
+        Intent intent = new Intent(this, DownloadActivity.class);
+        PendingIntent pi = PendingIntent.getActivity(this,0,intent,0);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher));
+        builder.setContentIntent(pi);
+        builder.setContentTitle(title);
+        if(progress > 0){
+            builder.setContentText(progress + "%");
+            builder.setProgress(100,progress,false);
+        }
+        return builder.build();
     }
 
     public DownloadService() {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return mBinder;
     }
 }
