@@ -1,10 +1,18 @@
 package com.richer.cartoonapp.Acitivity;
 
+import android.Manifest;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -12,7 +20,7 @@ import android.widget.Toast;
 import com.richer.cartoonapp.Adapter.ChapterAdapter;
 import com.richer.cartoonapp.Adapter.ContentAdapter;
 import com.richer.cartoonapp.Beans.Content;
-import com.richer.cartoonapp.DownloadActivity;
+import com.richer.cartoonapp.DownloadService;
 import com.richer.cartoonapp.R;
 import com.richer.cartoonapp.Util.HttpUtil;
 import com.richer.cartoonapp.Util.Utility;
@@ -36,6 +44,22 @@ public class ContentActivity extends AppCompatActivity {
     private int chapterId;
     private String chapterName;
     private ZoomRecyclerView recyclerView;
+
+    private String url;
+
+    private DownloadService.DownloadBinder downloadBinder;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            downloadBinder = (DownloadService.DownloadBinder) service;
+            downloadBinder.startDownload(url,chapterName);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +104,7 @@ public class ContentActivity extends AppCompatActivity {
                 String responseText = response.body().string();
                 System.out.println("#############"+responseText);
                 contentList = Utility.handleContentResponse(responseText);
+                url = Utility.getDownloadUrl(responseText);
                 ContentActivity.this.runOnUiThread(()->{
                     adapter = new ContentAdapter(contentList);
                     recyclerView.setAdapter(adapter);
@@ -106,8 +131,12 @@ public class ContentActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.action_download:
-                Intent intent = new Intent(this, DownloadActivity.class);
-                startActivity(intent);
+                if(ContextCompat.checkSelfPermission(ContentActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(ContentActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+                }else{
+                    Intent bindIntent = new Intent(this,DownloadService.class);
+                    bindService(bindIntent,connection,BIND_AUTO_CREATE);
+                }
                 break;
             default:
                 break;

@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Comics> comicsList = new ArrayList<>();
 
     private boolean runService = false;
-    private static final String CHANNEL_ID = "Subscribe";
+    public static final String CHANNEL_ID = "Subscribe";
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {

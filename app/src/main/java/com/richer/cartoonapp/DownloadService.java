@@ -10,8 +10,10 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.richer.cartoonapp.Acitivity.ContentActivity;
 import com.richer.cartoonapp.Acitivity.MainActivity;
 
 import java.io.File;
@@ -21,6 +23,9 @@ public class DownloadService extends Service {
     private DownloadTask downloadTask;
 
     private String downloadUrl;
+    private String name;
+
+    private DownloadBinder mBinder = new DownloadBinder();
 
     private DownloadListener listener = new DownloadListener() {
         @Override
@@ -58,14 +63,13 @@ public class DownloadService extends Service {
         }
     };
 
-    private DownloadBinder mBinder = new DownloadBinder();
-
-    class DownloadBinder extends Binder{
-        public void startDownload(String url){
+    public class DownloadBinder extends Binder{
+        public void startDownload(String url,String chapterName){
             if(downloadTask == null){
                 downloadUrl = url;
                 downloadTask = new DownloadTask(listener);
-                downloadTask.execute(downloadUrl);
+                downloadTask.execute(downloadUrl,chapterName);
+                name = chapterName;
                 startForeground(1,getNotification("Downloading...",0));
                 Toast.makeText(DownloadService.this,"Downloading...",Toast.LENGTH_SHORT).show();
             }
@@ -77,12 +81,12 @@ public class DownloadService extends Service {
             }
         }
 
-        public void cacelDownload(){
+        public void cancelDownload(){
             if(downloadTask != null){
                 downloadTask.cancelDownload();
             }else{
                 if(downloadUrl != null){
-                    String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
+                    String fileName = name;
                     String directory = Environment.getExternalStoragePublicDirectory
                             (Environment.DIRECTORY_DOWNLOADS).getPath();
                     File file = new File(directory + fileName);
@@ -102,10 +106,10 @@ public class DownloadService extends Service {
     }
 
     private Notification getNotification(String title,int progress){
-        Intent intent = new Intent(this, DownloadActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this,0,intent,0);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher));
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,MainActivity.CHANNEL_ID);
+        builder.setSmallIcon(R.drawable.ic_launcher_background);
         builder.setContentIntent(pi);
         builder.setContentTitle(title);
         if(progress > 0){
@@ -123,4 +127,6 @@ public class DownloadService extends Service {
         // TODO: Return the communication channel to the service.
         return mBinder;
     }
+
+
 }

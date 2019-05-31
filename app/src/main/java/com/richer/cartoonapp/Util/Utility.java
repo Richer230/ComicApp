@@ -139,4 +139,19 @@ public class Utility {
         return contentList;
     }
 
+    public static String getDownloadUrl(String response){
+        String downloadUrl = null;
+        if(!TextUtils.isEmpty(response)){
+            try{
+                JSONObject messages = new JSONObject(response);
+                JSONObject datas = messages.getJSONObject("data");
+                JSONObject returnData = datas.getJSONObject("returnData");
+                downloadUrl = returnData.getString("zip_file_high");
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+        return downloadUrl;
+    }
+
 }

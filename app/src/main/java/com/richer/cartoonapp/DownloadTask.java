@@ -2,6 +2,7 @@ package com.richer.cartoonapp;
 
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,14 +39,17 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
         try{
             long downloadedLength = 0;
             String downloadUrl = strings[0];
-            String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
+            String chapterName = strings[1];
+            String fileName = "/"+chapterName;
             String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+            new File(directory).mkdirs();
             file = new File(directory + fileName);
             if(file.exists()){
                 downloadedLength = file.length();
             }
             long contentLength = getContentLength(downloadUrl);
-            if(downloadedLength == 0){
+            if(contentLength == 0){
+                Log.d("failed1", "doInBackground: ");
                 return TYPE_FAILED;
             }else if(contentLength == downloadedLength){
                 return TYPE_SUCCESS;
@@ -58,6 +62,7 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
                     .build();
             Response response = client.newCall(request).execute();
             if(response != null){
+                Log.d("DownloadTask", "doInBackground: wwwwww");
                 is = response.body().byteStream();
                 savedFile = new RandomAccessFile(file,"rw");
                 savedFile.seek(downloadedLength);
@@ -96,6 +101,7 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
                 e.printStackTrace();
             }
         }
+        Log.d("failed2", "doInBackground: ");
         return TYPE_FAILED;
     }
 
