@@ -1,28 +1,34 @@
-package com.richer.cartoonapp;
+package com.richer.cartoonapp.Service;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.richer.cartoonapp.Acitivity.ContentActivity;
 import com.richer.cartoonapp.Acitivity.MainActivity;
+import com.richer.cartoonapp.Util.DownloadTask;
+import com.richer.cartoonapp.R;
+
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 import java.io.File;
+import java.util.Map;
+import java.util.Set;
 
 public class DownloadService extends Service {
 
     private DownloadTask downloadTask;
 
     private String downloadUrl;
+    private String id;
     private String name;
 
     private DownloadBinder mBinder = new DownloadBinder();
@@ -39,6 +45,7 @@ public class DownloadService extends Service {
             stopForeground(true);
             getNotificationManager().notify(1,getNotification("Download Success",-1));
             Toast.makeText(DownloadService.this,"Download Success",Toast.LENGTH_SHORT).show();
+            initZip();
         }
 
         @Override
@@ -63,16 +70,59 @@ public class DownloadService extends Service {
         }
     };
 
+
+    private void initZip() {
+
+        File f = Environment.getExternalStorageDirectory();
+        String path = f.getPath()+"/downloadImages";
+        File downloadFile = new File(path);
+        downloadFile.mkdirs();
+        String d = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+        try {
+            unZip(d+"/"+id,downloadFile.getPath()+"/"+id+"/");
+        } catch (ZipException e) {
+            e.printStackTrace();
+        }
+        SharedPreferences.Editor editor = getSharedPreferences("downloadMessage",MODE_PRIVATE).edit();
+        editor.putString(id,name);
+        editor.apply();
+
+    }
+
+    public void unZip(String zipfile, String dest) throws ZipException
+    {
+        System.out.println(zipfile);
+        ZipFile zfile = new ZipFile(zipfile);
+        zfile.setFileNameCharset("UTF-8");
+        if (!zfile.isValidZipFile())
+        {
+            throw new ZipException("压缩文件不合法，可能已经损坏！");
+        }
+        File allFile = new File(dest);
+        allFile.mkdirs();
+        zfile.extractAll(dest);
+
+    }
+
     public class DownloadBinder extends Binder{
-        public void startDownload(String url,String chapterName){
-            if(downloadTask == null){
-                downloadUrl = url;
-                downloadTask = new DownloadTask(listener);
-                downloadTask.execute(downloadUrl,chapterName);
-                name = chapterName;
-                startForeground(1,getNotification("Downloading...",0));
-                Toast.makeText(DownloadService.this,"Downloading...",Toast.LENGTH_SHORT).show();
+        public void startDownload(Map<String,String> map,String chapterName){
+            name = chapterName;
+            Set<String> idSet = map.keySet();
+            for(String chapterId:idSet){
+                String url = map.get(chapterId);
+                if(downloadTask == null){
+                    downloadUrl = url;
+                    downloadTask = new DownloadTask(listener);
+                    System.out.println(downloadUrl);
+                    downloadTask.execute(downloadUrl,chapterId);
+                    id = chapterId;
+                    startForeground(1,getNotification("Downloading...",0));
+                    Toast.makeText(DownloadService.this,"Downloading...",Toast.LENGTH_SHORT).show();
+                }
             }
+            SharedPreferences.Editor editor = getSharedPreferences("download",MODE_PRIVATE).edit();
+            editor.clear();
+            editor.apply();
         }
 
         public void pauseDownload(){
@@ -86,7 +136,7 @@ public class DownloadService extends Service {
                 downloadTask.cancelDownload();
             }else{
                 if(downloadUrl != null){
-                    String fileName = name;
+                    String fileName = id;
                     String directory = Environment.getExternalStoragePublicDirectory
                             (Environment.DIRECTORY_DOWNLOADS).getPath();
                     File file = new File(directory + fileName);
@@ -127,6 +177,16 @@ public class DownloadService extends Service {
         // TODO: Return the communication channel to the service.
         return mBinder;
     }
+
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
 
 
 }

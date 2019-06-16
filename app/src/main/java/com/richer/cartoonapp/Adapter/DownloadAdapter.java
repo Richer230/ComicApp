@@ -1,6 +1,8 @@
 package com.richer.cartoonapp.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -10,7 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.richer.cartoonapp.Acitivity.ContentActivity;
 import com.richer.cartoonapp.Beans.Chapters;
+import com.richer.cartoonapp.DownloadContentActivity;
 import com.richer.cartoonapp.R;
 
 import java.util.List;
@@ -19,25 +23,21 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHo
 
     private Context mContext;
 
-    private List<Chapters> mChapterList;
+    private List<String> mChapterList;
 
     static class ViewHolder extends RecyclerView.ViewHolder{
 
         CardView cardView;
-        ImageView downloadImage;
         TextView chapterName;
-        TextView status;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = (CardView) itemView;
-            downloadImage = itemView.findViewById(R.id.download_image);
             chapterName = itemView.findViewById(R.id.download_chapter_name);
-            status = itemView.findViewById(R.id.download_status);
         }
     }
 
-    public DownloadAdapter(List<Chapters> chaptersList){
+    public DownloadAdapter(List<String> chaptersList){
         mChapterList = chaptersList;
     }
 
@@ -53,12 +53,25 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull DownloadAdapter.ViewHolder viewHolder, int i) {
-        Chapters chapter = mChapterList.get(i);
+        String id = mChapterList.get(i);
 
+        SharedPreferences spf = mContext.getSharedPreferences("downloadMessage",Context.MODE_PRIVATE);
+        String name = spf.getString(id,"当前无已下载项");
+
+        viewHolder.chapterName.setText(name);
+        viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, DownloadContentActivity.class);
+                intent.putExtra("fileId",id);
+                intent.putExtra("fileName",name);
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mChapterList.size();
     }
 }

@@ -149,7 +149,7 @@ public class HomeFragment extends Fragment {
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-               //  Toast.makeText(,"加载失败",Toast.LENGTH_SHORT).show();
+                 Toast.makeText(getContext(),"加载失败",Toast.LENGTH_SHORT).show();
             }
 
             @Override

@@ -13,28 +13,28 @@ import com.bumptech.glide.Glide;
 import com.richer.cartoonapp.Beans.Content;
 import com.richer.cartoonapp.R;
 
+import java.io.File;
 import java.util.List;
 
-public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHolder> {
+public class DownloadContentAdapter extends RecyclerView.Adapter<DownloadContentAdapter.ViewHolder> {
 
     private Context mContext;
-    private List<Content> mContentList;
+    private List<File> mContentList;
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public DownloadContentAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         if(mContext == null){
             mContext = viewGroup.getContext();
         }
-        View view = LayoutInflater.from(mContext).inflate(R.layout.content_item,viewGroup,false);
-        return new ViewHolder(view);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.download_content_item,viewGroup,false);
+        return new DownloadContentAdapter.ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        Content content = mContentList.get(i);
-        Glide.with(mContext).load(content.getImg50()).into(viewHolder.contentImage);
-
+        File file = mContentList.get(i);
+        Glide.with(mContext).load(file).into(viewHolder.contentImage);
     }
 
     @Override
@@ -49,10 +49,10 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
         public ViewHolder(View view){
             super(view);
             cardView = (CardView) view;
-            contentImage = view.findViewById(R.id.content_image);
+            contentImage = view.findViewById(R.id.download_content_image);
         }
     }
-    public ContentAdapter(List<Content> contentList){
+    public DownloadContentAdapter(List<File> contentList){
         mContentList = contentList;
     }
 }

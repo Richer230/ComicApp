@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
@@ -12,15 +13,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.richer.cartoonapp.Adapter.ChapterAdapter;
 import com.richer.cartoonapp.Adapter.ContentAdapter;
 import com.richer.cartoonapp.Beans.Content;
-import com.richer.cartoonapp.DownloadService;
+import com.richer.cartoonapp.Service.DownloadService;
 import com.richer.cartoonapp.R;
 import com.richer.cartoonapp.Util.HttpUtil;
 import com.richer.cartoonapp.Util.Utility;
@@ -29,6 +28,7 @@ import com.richer.cartoonapp.Util.ZoomRecyclerView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -46,14 +46,17 @@ public class ContentActivity extends AppCompatActivity {
     private ZoomRecyclerView recyclerView;
 
     private String url;
+    private Map<String,String> downloadMap;
 
     private DownloadService.DownloadBinder downloadBinder;
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            SharedPreferences spf = getSharedPreferences("download",MODE_PRIVATE);
+            downloadMap = (Map<String, String>) spf.getAll();
             downloadBinder = (DownloadService.DownloadBinder) service;
-            downloadBinder.startDownload(url,chapterName);
+            downloadBinder.startDownload(downloadMap,chapterName);
         }
 
         @Override
@@ -131,6 +134,13 @@ public class ContentActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.action_download:
+                SharedPreferences spf = getSharedPreferences("download",MODE_PRIVATE);
+                String Url = spf.getString(String.valueOf(chapterId),null);
+                if(Url == null){
+                    SharedPreferences.Editor editor = getSharedPreferences("download",MODE_PRIVATE).edit();
+                    editor.putString(String.valueOf(chapterId),url);
+                    editor.apply();
+                }
                 if(ContextCompat.checkSelfPermission(ContentActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(ContentActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
                 }else{

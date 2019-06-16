@@ -1,8 +1,10 @@
-package com.richer.cartoonapp;
+package com.richer.cartoonapp.Util;
 
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
+
+import com.richer.cartoonapp.Service.DownloadListener;
 
 import java.io.File;
 import java.io.IOException;

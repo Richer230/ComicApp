@@ -1,4 +1,4 @@
-package com.richer.cartoonapp;
+package com.richer.cartoonapp.Service;
 
 public interface DownloadListener {
 
