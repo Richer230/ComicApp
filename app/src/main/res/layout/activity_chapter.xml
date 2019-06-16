@@ -80,11 +80,13 @@
             <Button
                 android:layout_marginLeft="120dp"
                 android:id="@+id/bt_subscibe"
+                android:background="#ffffff"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="订阅" />
 
             <Button
+                android:background="#ffffff"
                 android:id="@+id/cancel_subscribe"
                 android:text="取消订阅"
                 android:layout_width="wrap_content"

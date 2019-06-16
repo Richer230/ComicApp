@@ -10,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.richer.cartoonapp.Adapter.DownloadAdapter;
 import com.richer.cartoonapp.R;
@@ -26,6 +28,8 @@ public class DownloadFragment extends Fragment {
 
     private DownloadAdapter adapter;
     private RecyclerView recyclerView;
+
+    private Button deleteButton;
 
     @Nullable
     @Override
