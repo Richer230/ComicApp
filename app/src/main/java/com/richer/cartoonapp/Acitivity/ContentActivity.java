@@ -85,7 +85,6 @@ public class ContentActivity extends AppCompatActivity {
         if(orientation){
             ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.VERTICAL);
         }
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(chapterName);
     }
@@ -123,15 +122,17 @@ public class ContentActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case android.R.id.home:
                 onBackPressed();
+                break;
             case R.id.action_change:
                 if(orientation){
-                    ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.HORIZONTAL);
+                    Intent intent = new Intent(ContentActivity.this,HorizontalContentAcitivity.class);
+                    intent.putExtra("chapter_id",chapterId);
+                    intent.putExtra("chapter_name",chapterName);
+                    startActivity(intent);
                     orientation = false;
+                    finish();
                 }else{
-                    ((LinearLayoutManager)recyclerView.getLayoutManager()).setOrientation(LinearLayoutManager.VERTICAL);
-                    orientation = true;
                 }
-                adapter.notifyDataSetChanged();
                 break;
             case R.id.action_download:
                 SharedPreferences spf = getSharedPreferences("download",MODE_PRIVATE);

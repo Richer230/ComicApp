@@ -15,9 +15,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".DownloadContentActivity"
-            android:parentActivityName=".Acitivity.MainActivity"
-            ></activity>
+        <activity
+            android:name=".Acitivity.HorizontalContentAcitivity"
+            android:label="@string/title_activity_horizontal_content_acitivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".DownloadContentActivity"
+            android:parentActivityName=".Acitivity.MainActivity" />
 
         <service
             android:name=".Service.SubscribeService"
